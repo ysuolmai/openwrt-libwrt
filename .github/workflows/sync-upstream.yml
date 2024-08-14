@@ -1,0 +1,32 @@
+name: Sync Fork with Upstream
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 每天凌晨执行同步，可以根据需要调整时间
+  workflow_dispatch:  # 允许手动触发工作流
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout your repository
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+
+    - name: Add upstream repository
+      run: |
+        git remote add upstream https://github.com/LiBwrt-op/openwrt-6.x.git
+        git fetch upstream
+
+    - name: Merge upstream changes
+      run: |
+        git checkout main  # 确保与上游的主分支同步
+        git merge upstream/main  # 如果使用不同的分支名称，请调整
+
+    - name: Push changes to fork repository
+      run: |
+        git push origin main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
